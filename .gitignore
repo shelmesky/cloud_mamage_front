@@ -1,4 +1,4 @@
 *.pyc
-/..gitignore
 *.log
 *.mo
+*.db
