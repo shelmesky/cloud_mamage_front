@@ -1,0 +1,200 @@
+/*!
+ * Copyright 2012 VAS Shanghai.
+ */
+ 
+div {
+    display: block;
+}
+
+ 
+.logo-opencloud {
+    background-image: url('/static/img/cloud-open-logo.png');
+    background-repeat: no-repeat;
+    background-position: 20px 10px;
+}
+
+#content {
+	min-height: 450px;
+}
+
+/* menu layout */
+.opencloud-menu > li > a {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-weight: bold;
+    font-size: 14px;
+}
+/* END menu layout */
+
+/*
+ul {
+    list-style: none;
+    margin: 0;	
+}
+*/
+
+.footer {
+	color: #666;
+	text-align: center;
+	border-top: 1px #ddd solid;
+	padding-top: 15px;
+	padding-bottom: 10px;
+	position:absolute;
+	bottom:0;
+	width:100%;
+	line-height:50px;
+}
+
+.footer a {
+	color: #666;
+	text-decoration: underline;
+}
+.loading-div {
+    text-align: center;
+    color: #aaa;
+}
+.title{
+    color: #666;
+    padding-right: 10px;
+}
+.image-launch-success{
+    color: green;
+    text-align: center;
+}
+i.status-updating {
+    background-image: url('/static/img/loading.gif');
+    background-repeat: no-repeat;
+    padding-left: 16px;
+}
+
+/* for launch instance process loading */
+#progress_zone div{
+    color: #666;
+    padding-left: 20px;
+    margin-bottom: 8px;
+}
+#progress_zone .doing{
+    color: #111;
+    font-weight: bold;
+    background-image: url('/static/img/loading.gif');
+    background-repeat: no-repeat;
+}
+#progress_zone .updating-dot{
+    display: none;
+}
+#progress_zone .doing .updating-dot{
+    display: inline;
+    font-weight: bold;
+    padding-left: 5px;
+}
+#progress_zone .success{
+    color: #111;
+    background-image: url('/static/img/success.gif');
+    background-repeat: no-repeat;
+}
+.button_col{
+    width: 20px;
+}
+.status_col{
+    width: 100px;
+}
+thead th, tfoot td {
+    background: #e1e1e1 url(../img/nav-bg.gif) top left repeat-x;
+    border-bottom: 1px solid #ddd;
+}
+.pagination .active a {
+    font-weight: bold;
+}
+
+.collapse_area {
+    width: auto;
+    margin-bottom: 2px;
+    border: 1px solid #E5E5E5;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.collapse_area_heading{
+    border-bottom: 0;
+}
+
+.collapse_area_inner{
+    display: block;
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+a {
+    color: #08C;
+    text-decoration: none;
+}
+
+.collapse_body_inner {
+    display: block;
+    padding: 9px 15px;
+    border-top: 1px solid #E5E5E5;
+    width: auto;
+}
+
+.icon-ok {
+    float: right;
+}
+
+.icon-remove {
+    float: right;
+}
+
+.icon-leaf {
+    float: right;
+}
+
+.icon-star {
+    float: right;
+}
+
+.instance_detail_table table {
+    border-collapse: inherit;
+    border-spacing: 10px;
+}
+
+#instance_states_td {
+    display: block;
+    text-align: left;
+    vertical-align: top;
+    width: 300px;
+    background-color: #BBD8E9;
+    border-radius: 3px;
+    height: 30%;
+}
+
+#instance_states_div {
+    padding-top: 5px;
+    padding-left: 5px;
+    width: 90%;
+}
+
+#instance_info_td {
+    display: block;
+    text-align: left;
+    vertical-align: top;
+    width: 300px;
+    background-color: #BBD8E9;
+    border-radius: 3px;
+    height: 30%;
+}
+
+#instance_info_div {
+    padding-top: 5px;
+    padding-left: 5px;
+    width: 90%;
+}
+
+input {
+    height: 24px;
+}
+
+#item_nums {
+    font-size: 16;
+}
+
+

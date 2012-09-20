@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<style>
+.login-area{
+    margin-top: 15%;
+    text-align: center;
+    max-width: 565px;
+}
+
+.msg-div{
+    margin-top: 10px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container login-area">
+    <form action="" method="POST" class="from-inline">
+        {% csrf_token %}
+        <div title="Input your username" class="input-prepend" style="display:inline-block;">
+            <span class="add-on"><i class="icon icon-user"></i></span><input type="text" id="username" name="username" value="" placeholder="Username" style="height: 28px;" /></span>
+        </div>
+        <div title="Input your password" class="input-prepend" style="display: inline-block;">
+            <span class="add-on"><i class="icon icon-lock"></i></span><input type="password" id="password" name="password" value="" placeholder="Password"  style="height: 28px;" /></span>
+        </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <div id="global_msg">
+        {% include 'messages.html' %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if host_not_exist %}
+<div class="well">
+    Sorry, but can not found any job for current user!
+</div>
+{% endif %}
+
+
+{% if result_list %}
+    
+    <h4>{% trans 'Dispatched Jobs list: ' %}<span id="jobs_length" class="badge badge-info">{{ result_list|length }}</span>{% trans ' Records' %}</h4>
+    <br />
+    <div class="notification_results">
+        {% for item in result_list %}
+            {% for k,v in item.items %}
+                
+                <script type="text/javascript">
+                /**
+                $(document).ready(function(){
+                    $('#collapse_area_{{ v.result.id }}').on('shown', function () {
+                        $("#collapse_area_{{ v.result.id }}").css({border:'1px solid #08C'});
+                    })
+                    $('#collapse_area_{{ v.result.id }}').on('hidden', function () {
+                        $("#collapse_area_{{ v.result.id }}").css({border:'1px solid #E5E5E5'});
+                    })
+                });
+                **/
+                </script>
+                
+                
+                    <div class="collapse_area" id="collapse_area_{{ v.result.id }}">
+                        <div class="collapse_area_heading">
+                                <div class="collapse_area_inner" data-parent="notifications" data-toggle="collapse" data-target="#show_collapse{{ v.result.id }}">
+                                    {% if v.notification.state == 2 %}
+                                        <span class="label label-important">Critical</span>
+                                    {% elif v.notification.state == 1 %}
+                                        {% if v.notification.notification_type == 0 %}
+                                            <span class="label label-important">Critical</span>
+                                        {% else %}
+                                            <span class="label label-warning">Warning</span>
+                                        {% endif %}
+                                    {% elif v.notification.state == 0 %}
+                                        <span class="label label-success">Success</span>
+                                    {% endif %}
+                                    
+                                    <span class="badge badge-inverse">#{{ v.result.id }}</span>
+                                    &nbsp;&nbsp;{{ v.result.time|date:"Y-m-d H:i" }}
+                                    &nbsp;&nbsp;{{ v.notification.hostname }}
+                                    {% if line.service_description != "(null)" %}
+                                        &nbsp;&nbsp;{{ v.notification.service_description }}
+                                    {% endif %}
+                                    &nbsp;&nbsp;{{ v.notification.output }}
+                                    {% if not v.result.op_processed_result %}
+                                        <a style="display: none; float: right;" id="processed_icon_{{ v.result.id }}" class="icon-ok-sign icon-black"></a>
+                                    {% else %}
+                                        <a style="float: right;" id="processed_icon_{{ v.result.id }}" class="icon-ok icon-black"></a>
+                                    {% endif %}
+                                </div>
+                        </div>
+                        <div id="show_collapse{{ v.result.id }}" class="collapse out">
+                            <div class="collapse_body_inner">
+                                <div>
+                                    From: {{ v.result.from_user }}&nbsp;&nbsp;To: {{ v.result.to_user }}&nbsp;&nbsp;Advice: {{ v.result.result }}        
+                                </div>
+                                {% if not v.result.op_processed_result %}
+                                    <div id="input_textarea">
+                                        {% trans 'Operator Processed Result:' %}
+                                        <p>{% trans 'Not Processed!' %}</p>
+                                        <label style="display: none;" id="ajax_tip_area_{{ v.result.id }}"></label>
+                                    </div>
+                                    <button onclick="submit_data({{ v.result.id }})"  class="btn btn-primary">{% trans 'Submit' %}</button>
+                                {% else %}
+                                    <div id="input_textarea">
+                                        {% trans 'Operator Processed Result:' %}
+                                        <div class="well">{{ v.result.op_processed_result }}</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endif %}    
+{% endblock %}

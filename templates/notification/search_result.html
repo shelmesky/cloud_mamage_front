@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% block extra_head %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        //setTimeout(myRefresh,30000)
+    });
+        function myRefresh() {
+            window.location.reload();
+        }
+        
+        function revoke_data(id) {
+            // send revoke id to server
+            var url = '/revoke/';
+            var method ='POST';
+            var data_type = 'json';
+            
+            var data = {};
+            data['data'] = id;
+            data['args'] = id;
+            data['success_func'] = showSuccess;
+            data['failed_func'] = showFailed;
+            do_ajax(url,method,data,data_type);
+            
+            function success_func(id) {
+                $("#collapse_area_"+id).hide('fast','swing');
+            }
+            return;
+        }
+        
+        function submit_data(id) {
+            var url = '/update/';
+            var method ='POST';
+            var data_type = 'json';
+            var form_data = getProcessData(id);
+            if (form_data == false) {
+                showEmptyValue(id);
+                return;
+            }
+            var data = {};
+            data['data'] = form_data;
+            data['args'] = id;
+            data['success_func'] = showSuccess;
+            data['failed_func'] = showFailed;
+            do_ajax(url,method,data,data_type);
+        }
+    
+        function getProcessData(id) {
+            result = $("#processed_result_"+id).val();
+            user = $("#processed_user_"+id).val();
+            result = result.trim();
+            if (result.length == 0) {
+                return false;
+            }
+            ori_data = {id:id,result:result,user:user};
+            return ori_data;
+        }
+        
+        function showEmptyValue(id) {
+            var html = "{% trans 'say something, please...' %}";
+            $("#ajax_tip_area_"+id).html(html);
+            $("#ajax_tip_area_"+id).show('fast')
+        }
+        
+        function showSuccess(id) {
+            $("#processed_icon_"+id).hide();
+            $("#processed_icon_"+id).show('fast','linear');
+            setTimeout(hide_collapse_area,1000);
+            function hide_collapse_area() {
+                $("#collapse_area_"+id).hide('fast','swing');
+                var notification_len = $("#notification_length").html();
+                notification_len -= 1;
+                $("#notification_length").html(notification_len);
+                return;
+            }
+        }
+        
+        function showFailed(id) {
+            var html = "{% trans 'failed while send to server...' %}";
+            $("#ajax_tip_area_"+id).html(html);
+            $("#ajax_tip_area_"+id).show('fast');
+            return;
+        }
+        
+        function do_ajax(url,method,data,data_type) {
+            var result = {};
+            result['data'] = JSON.stringify(data['data']);
+            var success_func = data['success_func'];
+            var failed_func = data['failed_func'];
+            var args = data['args'];
+            var _url = url;
+            $.ajax({
+                    type: method,
+                    url: _url,
+                    dataType : data_type,
+                    data : result,
+                    success: function(data,textStatus,jqXHR) {
+                        if (success_func != undefined) {
+                            success_func(args);
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        if (failed_func != undefined ){
+                            failed_func(args);
+                        }
+                    }
+            });
+        }
+</script>
+{% endblock %} 
+    
+{% block content %}
+
+{% if host_not_exist %}
+<div class="well">
+    {% trans 'Sorry, but can not found any notification data!' %}
+    <a href="{% url notifications %}" class="btn btn-danger">{% trans 'Back Off' %}</a>
+</div>
+{% endif %}
+
+{% if empty_keyword %}
+    <div class="well">
+        {% trans 'You have entered empty keyword or some special characters, please try again.' %}
+        <a href="{% url notifications %}" class="btn btn-danger">{% trans 'Back Off' %}</a>
+    </div>
+{% endif %}
+
+{% if notifications %}
+    <div>
+        <span id="item_nums">{% trans 'Notification list: ' %}<span id="notification_length" class="badge badge-info">{{ original_notifications|length }}</span>{% trans ' Records' %}</span>
+        <span>
+            <form action="" method="get" class="form-search" style="float: right;">
+                <input type="hidden" name="source" value="form">
+                <input type="text" class="input-xlarge" name="keyword">
+                <button type="submit" class="btn">{% trans 'Search' %}</button>
+                <a href="{% url advanced_search %}" class="btn">{% trans 'Advanced Search' %}</a>
+            </form>
+        </span>
+    </div>
+    <br />
+    <div class="notifications">
+        {% for line in notifications %}
+            {% if not line.has_processed %}
+                
+                <script type="text/javascript">
+                /**
+                $(document).ready(function(){
+                    $('#collapse_area_{{ line.id }}').on('shown', function () {
+                        $("#collapse_area_{{ line.id }}").css({border:'1px solid #08C'});
+                    })
+                    $('#collapse_area_{{ line.id }}').on('hidden', function () {
+                        $("#collapse_area_{{ line.id }}").css({border:'1px solid #E5E5E5'});
+                    })
+                });
+                **/
+                </script>
+                
+                <div class="collapse_area" id="collapse_area_{{ line.id }}">
+                    <div class="collapse_area_heading">
+                            <div class="collapse_area_inner" data-parent="notifications" data-toggle="collapse" data-target="#show_collapse{{ line.id }}">
+                                {% if line.state == 2 %}
+                                    <span class="label label-important">Critical</span>
+                                {% elif line.state == 1 %}
+                                    {% if line.notification_type == 0 %}
+                                        <span class="label label-important">Critical</span>
+                                    {% else %}
+                                        <span class="label label-warning">Warning</span>
+                                    {% endif %}
+                                {% elif line.state == 0 %}
+                                    <span class="label label-success">Success</span>
+                                {% endif %}
+                                
+                                <span class="badge badge-inverse">#{{ line.id }}</span>
+                                &nbsp;&nbsp;{{ line.created_time|date:"Y-m-d H:i" }}
+                                &nbsp;&nbsp;{{ line.hostname }}
+                                {% if line.service_description != "(null)" %}
+                                    &nbsp;&nbsp;{{ line.service_description }}
+                                {% endif %}
+                                &nbsp;&nbsp;{{ line.output }}
+                                
+                                {% if not line.has_processed %}
+                                    <a style="display: none; float: right;" id="processed_icon_{{ line.id }}" class="icon-ok-sign icon-black"></a>
+                                {% else %}
+                                    <a style="float: right;" id="processed_icon_{{ line.id }}" class="icon-ok icon-black"></a>
+                                {% endif %}
+                            </div>
+                    </div>
+                    <div id="show_collapse{{ line.id }}" class="collapse out">
+                        <div class="collapse_body_inner">
+                            <div class='input-prepend'>
+                                <span class="add-on">{% trans 'Input Message:' %}</span>
+                                <input id="processed_result_{{ line.id }}" class="input-xlarge"  onkeypress="if(event.keyCode==13)  {submit_data({{ line.id }});}" placeholder="{% trans 'Message...' %}" style="height: 28px;">
+                                <li id="user_icon" class="icon-arrow-right icon-black"></li>
+                                <select id="processed_user_{{ line.id }}">
+                                    {% for user in user_list %}
+                                        <option>{{ user }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label style="display: none;" id="ajax_tip_area_{{ line.id }}">
+                            </div>
+                            <button onclick="submit_data({{ line.id }})" type="submit" class="btn">Submit</button>
+                            <button onclick="revoke_data({{ line.id }})" type="submit" class="btn">Revoke</button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    
+    {% load paginator_bar %}
+    {% render_paginator_bar notifications keyword starttime endtime critical warning unknown %}
+{% endif %}
+{% endblock %}
+

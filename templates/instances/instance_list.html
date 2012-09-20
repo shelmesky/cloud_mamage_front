@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load show_healthy %}
+
+{% block extra_head %}
+<script type="text/javascript">
+    $(document).ready(function(){
+
+    });
+    
+    function insert_html_network(ip,item,state) {
+        if(state == undefined) {
+            $("#instance_body").append("<i class='icon-warning-sign icon-black'></i> {% trans 'No Network state for this instance.' %}<br />");
+            return;
+        }
+        if (state == 1) {
+            var image = "<i class='icon-ok icon-black'></i>";
+        }
+        else {
+            var image = "<i class='icon-remove icon-black'></i>";
+        }
+        $("#instance_body").append(
+            "<i class='icon-asterisk icon-black'></i> " + ip + "&nbsp;&nbsp;&nbsp;" + item + " " + image + "<br />"
+        );
+    }
+    
+    function insert_html_system(item, state, cpu_usage_real) {
+        if (item == undefined ) {
+            $("#instance_body").append(
+                "<i class='icon-warning-sign icon-black'></i> {% trans 'No System state for this instance.' %}<br />" 
+            );
+            return;
+        }
+        
+        if (state == 0) {
+            var image = "<i class='icon-ok icon-black'></i>";
+        }
+        else {
+            var image = "<i class='icon-remove icon-black'></i>";
+        }
+        
+        if(item == "cpu_usage"){
+            $("#instance_body").append(
+                "<i class='icon-asterisk icon-black'></i> CPU Usage: " + cpu_usage_real + image + "<br />"
+            );
+        }
+        if(item == "bandwidth_usage"){
+            $("#instance_body").append(
+                "<i class='icon-asterisk icon-black'></i> Bandwidth Usage: " + image + "<br />"
+            );
+        }
+    }
+    
+    function showSuccess(data){
+        $("#instance_body").empty();
+        $("#instance_head_content").empty();
+        data = data[0];
+        var moniting_state = data.moniting_state;
+        var notification_state = data.notification_state;
+        if(moniting_state != null) {
+            for (var state in moniting_state) {
+                if (state != 'uuid'){
+                    var ip_state = moniting_state[state];
+                    for (var item in ip_state){
+                        if(item == 'arp'){
+                            insert_html_network(state, "ARP", ip_state[item]);
+                        }
+                        if(item == 'ping'){
+                            insert_html_network(state, "PING", ip_state[item]);
+                        }
+                        if(item == "tcp") {
+                            for(port in ip_state[item]){
+                                insert_html_network(state, "TCP: " + port, ip_state[item][port]);
+                            }
+                        }
+                        if(item == "udp") {
+                            for(port in ip_state[item]){
+                                insert_html_network(state, "UDP: " + port, ip_state[item][port]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else{
+            insert_html_network();
+        }
+        
+        if(notification_state != null) {
+            var bandwidth_usage = notification_state.bandwidth_usage;
+            var cpu_usage = notification_state.cpu_usage;
+            var cpu_usage_real = notification_state.cpu_usage_real;
+            insert_html_system("cpu_usage", cpu_usage, cpu_usage_real);
+            insert_html_system("bandwidth_usage", bandwidth_usage);
+        }
+        else{
+            insert_html_system();
+        }
+        
+        $("#instance_head_content").append(
+            "{% trans 'Host: ' %}" + data.physical_host + "{% trans ' Name: ' %}" + data.name + "{% trans ' State: ' %}" + data.state
+            + "{% trans ' Update: ' %}" + data.last_update_time
+        );
+        $("#modal_instance_network").modal('show', {keyboard: true});
+    }
+    
+    function showFailed() {
+        
+    }
+    
+    function instance_detail(uuid) {
+        var data={};
+        var url = '/instances/get_instance_state/';
+        var method ='POST';
+        var data_type = 'json';
+        data['data'] = uuid;
+        data['success_func'] = showSuccess;
+        data['failed_func'] = showFailed;
+        do_ajax(url,method,data,data_type);
+    }
+    
+    function do_ajax(url,method,data,data_type) {
+        var result = {};
+        result['data'] = JSON.stringify(data['data']);
+        var success_func = data['success_func'];
+        var failed_func = data['failed_func'];
+        var args = data['args'];
+        var _url = url;
+        $.ajax({
+            type: method,
+            url: _url,
+            dataType : data_type,
+            data : result,
+            success: function(data,textStatus,jqXHR) {
+                if (success_func != undefined) {
+                    success_func(data);
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                if (failed_func != undefined ){
+                    failed_func(data);
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+
+{% block content %}
+    <table class="table table-bordered table-condensed" id="instance_table">
+    <thead>
+        <tr>
+            <th>{% trans 'Physical Host' %}</th>
+            <th>{% trans 'IP Address' %}</th>
+            <th>{% trans 'Name' %}</th>
+            <th>{% trans 'Status' %}</th>
+            <th>{% trans 'Last Update' %}</th>
+            <th>{% trans 'Healthy' %}</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for instance in instances %}
+            {% if instance.physical_host %}
+                <tr>
+                    <td>
+                        {{ instance.physical_host }}
+                        {% if instance.ip_address %}
+                            <a href="{% url instances_setting instance.uuid %}">
+                                <i class="icon icon-leaf icon-black"></i>
+                            </a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% for ip in instance.ip_address %}
+                            {{ ip }}<br />
+                        {% endfor %}
+                    </td>
+                    <td><a onclick="instance_detail('{{ instance.uuid }}')" href="#">{{ instance.name }}</a></td>
+                    <td>{{ instance.state }}</td>
+                    <td>{{ instance.last_update_time }}</td>
+                    <td>
+                        {% render_instances_healthy_percent instance.moniting_state instance.notification_state instance.state %}
+                    </td>
+                </tr>
+        {% endif %}
+        {% endfor %}
+    </tbody>
+    
+    
+    <div id="modal_instance_network" class="modal hide" style="width: 700px;">
+        <div id="instance_head" class="modal-header">
+            <a class="close" data-dismiss="modal" >&times;</a>
+            <h3>{% trans 'Network and system status:' %}</h3>
+            <div id="instance_head_content">
+                
+            </div>
+        </div>
+        
+        <div id="instance_body" class="modal-body">
+        </div>
+        
+        <div id="instance_footer" class="modal-footer">
+        <a href="javascript:;" class="btn"  data-dismiss="modal">{% trans 'Cancel' %}</a>
+        <button class="btn btn-primary" type="submit">{% trans 'Refresh' %}</button>
+        </div>
+    </div>
+{% endblock %}

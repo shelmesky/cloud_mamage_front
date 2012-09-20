@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block extra_head %}
+{% endblock %}
+
+{% block content %}
+<div class="well">
+    {% if user_not_exist %}
+        {% trans 'Oh! We can not found any infomation for current user!' %}
+        
+    {% elif finished %}
+        {% trans 'Great! We have update users information successfully!' %}
+        
+    {% else %}
+    <h4>{% trans 'Informations for user: ' %}{{ user.username }}</h4><br />
+    <form action="" method="post">
+        {% csrf_token %}
+        {% trans 'Password: ' %}<input type="password" class="input-medium" name="password" value="{{ user.password }}"><br />
+        {% trans 'Email: ' %}<input type="text" class="input-medium" name="email" value="{{ user.email }}"><br />
+        {% trans 'Cell Phone: ' %}<input type="text" class="input-medium" name="cell_phone" value="{{ user.cell_phone }}"><br />
+        <button class="btn btn-primary">{% trans 'Submit' %}</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}
+

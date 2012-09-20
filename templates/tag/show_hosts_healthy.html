@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>aaaa</title>
+<style type="text/css">
+*{margin:0;padding:0;}
+#outer{width:150px;border:1px solid #000;height:18px;margin:5px;}
+#inner{height:18px;}
+#font{position:relative;top:-16px;text-align:center;width:150px; font-size: xx-small;}
+</style>
+</head>
+<body>
+
+{% if percent == 0 %}
+    <div id="outer" style="background-color: red;">
+        <div id="inner"></div>
+        <div id="font">{{percent}}%</div>
+    </div>
+{% else %}
+    <div id="outer">
+        <div id="inner" style="width: {{ percent}}%;background-color: #19ff19;"></div>
+        <div id="font">{{percent}}%</div>
+    </div>
+{% endif %}
+
+</body>
+</html>

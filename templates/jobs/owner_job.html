@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<script type="text/javascript">
+$(document).ready(function(){
+    setTimeout(myRefresh,30000)
+});
+
+
+function myRefresh() {
+    window.location.reload();
+}
+
+
+function getProcessData(id) {
+    result = $("#textarea_"+id).val();
+    result = result.trim();
+    if (result.length == 0) {
+        return false;
+    }
+    ori_data = {id:id,result:result};
+    return ori_data;
+}
+
+
+function showSuccess(id) {
+    $("#processed_icon_"+id).hide();
+    $("#processed_icon_"+id).show('fast','linear');
+    setTimeout(hide_collapse_area,1000);
+    function hide_collapse_area() {
+        $("#collapse_area_"+id).hide('fast','swing');
+        var notification_len = $("#jobs_length").html();
+        notification_len -= 1;
+        $("#jobs_length").html(notification_len);
+        return;
+    }
+}
+
+
+function showFailed(id) {
+    var html = "{% trans 'failed while send to server...' %}";
+    $("#ajax_tip_area_"+id).html(html);
+    $("#ajax_tip_area_"+id).show('fast');
+    return;
+}
+
+
+function showEmptyValue(id) {
+    var html = "{% trans 'say something, please...' %}";
+    $("#ajax_tip_area_"+id).html(html);
+    $("#ajax_tip_area_"+id).show('fast')
+}
+
+
+
+function submit_data(id) {
+    var url = '/update_result/';
+    var method ='POST';
+    var data_type = 'json';
+    var form_data = getProcessData(id);
+    if (form_data == false) {
+        showEmptyValue(id);
+        return;
+    }
+    var data = {};
+    data['data'] = form_data;
+    data['args'] = id;
+    data['success_func'] = showSuccess;
+    data['failed_func'] = showFailed;
+    do_ajax(url,method,data,data_type);
+}
+
+
+function do_ajax(url,method,data,data_type) {
+    var result = {};
+    result['data'] = JSON.stringify(data['data']);
+    var success_func = data['success_func'];
+    var failed_func = data['failed_func'];
+    var args = data['args'];
+    var _url = url;
+    $.ajax({
+        type: method,
+        url: _url,
+        dataType : data_type,
+        data : result,
+        success: function(data,textStatus,jqXHR) {
+            if (success_func != undefined) {
+                success_func(args);
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            if (failed_func != undefined ){
+                failed_func(args);
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+{% if host_not_exist %}
+<div class="well">
+    Sorry, but can not found any job for current user!
+</div>
+{% endif %}
+
+{% if result_list %}
+    <h4>{% trans 'Jobs list: ' %}<span id="jobs_length" class="badge badge-info">{{ result_list|length }}</span>{% trans ' Records' %}</h4>
+    <br />
+    <div class="notification_results">
+        {% for item in result_list %}
+            {% for k,v in item.items %}
+                
+                <script type="text/javascript">
+                /**
+                $(document).ready(function(){
+                    $('#collapse_area_{{ v.result.id }}').on('shown', function () {
+                        $("#collapse_area_{{ v.result.id }}").css({border:'1px solid #08C'});
+                    })
+                    $('#collapse_area_{{ v.result.id }}').on('hidden', function () {
+                        $("#collapse_area_{{ v.result.id }}").css({border:'1px solid #E5E5E5'});
+                    })
+                });
+                **/
+                </script>
+                
+                
+                {% if not v.result.op_processed_result %}
+                    <div class="collapse_area" id="collapse_area_{{ v.result.id }}">
+                        <div class="collapse_area_heading">
+                                <div class="collapse_area_inner" data-parent="notifications" data-toggle="collapse" data-target="#show_collapse{{ v.result.id }}">
+                                    {% if v.notification.state == 2 %}
+                                        <span class="label label-important">Critical</span>
+                                    {% elif v.notification.state == 1 %}
+                                        {% if v.notification.notification_type == 0 %}
+                                            <span class="label label-important">Critical</span>
+                                        {% else %}
+                                            <span class="label label-warning">Warning</span>
+                                        {% endif %}
+                                    {% elif v.notification.state == 0 %}
+                                        <span class="label label-success">Success</span>
+                                    {% endif %}
+                                    
+                                    <span class="badge badge-inverse">#{{ v.result.id }}</span>
+                                    &nbsp;&nbsp;{{ v.result.time|date:"Y-m-d H:i" }}
+                                    &nbsp;&nbsp;{{ v.notification.hostname }}
+                                    {% if line.service_description != "(null)" %}
+                                        &nbsp;&nbsp;{{ v.notification.service_description }}
+                                    {% endif %}
+                                    &nbsp;&nbsp;{{ v.notification.output }}
+                                    {% if not v.result.op_processed_result %}
+                                        <a style="display: none; float: right;" id="processed_icon_{{ v.result.id }}" class="icon-ok-sign icon-black"></a>
+                                    {% else %}
+                                        <a style="float: right;" id="processed_icon_{{ v.result.id }}" class="icon-ok icon-black"></a>
+                                    {% endif %}
+                                </div>
+                        </div>
+                        <div id="show_collapse{{ v.result.id }}" class="collapse out">
+                            <div class="collapse_body_inner">
+                                <div>
+                                    From: {{ v.result.from_user }}&nbsp;&nbsp;To: {{ v.result.to_user }}&nbsp;&nbsp;Advice: {{ v.result.result }}        
+                                </div>
+                                <div id="input_textarea">
+                                    {% trans 'Operator Processed Result:' %}<br />
+                                    <textarea id="textarea_{{ v.result.id }}" rows="3" style="width: 900px;"></textarea><br/>
+                                    <label style="display: none;" id="ajax_tip_area_{{ v.result.id }}"></label>
+                                </div>
+                                <button onclick="submit_data({{ v.result.id }})"  class="btn btn-primary">{% trans 'Submit' %}</button>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% endblock %}
+

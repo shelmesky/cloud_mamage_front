@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% if show_host_chart %}
+        {% for host,services in host_dict.items %}
+            {% for service in services %}
+                <div>
+                    <center>
+                        <p><a href="{% url perfdata host service %}"><img src="{% url get_chart host service 'hours25' %}"></a></p>
+                    </center>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+    
+    {% if show_service_chart %}
+        {% for host,service in  host_and_service.items %}
+            <div>
+                <center>
+                    <p><img src="{% url get_chart host service 'hours4' %}"></p>
+                    <p><img src="{% url get_chart host service 'hours25' %}"></p>
+                    <p><img src="{% url get_chart host service 'week1' %}"></p>
+                    <p><img src="{% url get_chart host service 'month1' %}"></p>
+                    <p><img src="{% url get_chart host service 'year1' %}"></p>
+                </center>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+

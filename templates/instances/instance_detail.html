@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load show_healthy %}
+{% block extra_head %}
+<script type="text/javascript">
+$(document).ready(function(){
+    var debug = console.debug;
+    var data={{ instances|safe }};
+    for(var host in data) {
+        $("#hosts_list_select").append("<option>" + host + "</option>");
+    }
+    
+    
+    var selected_host = $("#hosts_list_select");
+    selected_host.change(function() {
+       var selected = selected_host.val();
+       var instances = get_hosts_instances(selected);
+       $("#instances_list_select").empty();
+       for(var ins in instances){
+            $("#instances_list_select").append("<option>" + instances[ins] + "</option>");
+       }
+    });
+    
+    function get_hosts_instances(physical_host) {
+        var instance_list = Array();
+        for(var host in data){
+            if(host == physical_host){
+                for(var ins in data[host]) {
+                    for(var onlyone in data[host][ins]) {
+                        instance_list.push(data[host][ins][onlyone].name);
+                    }
+                }
+            }
+        }
+        return instance_list;
+    }
+    
+    var selected_instance = $("#instances_list_select");
+    selected_instance.change(function() {
+        var selected = selected_instance.val();
+        var states_list = get_instance_states(selected);
+    });
+    
+    function get_instance_states(instance) {
+        var states_list = Array();
+        $("#instance_states_div").empty();
+        $("#instance_info_div").empty();
+        for(var host in data){
+            for(var ins in data[host]) {
+                for(var onlyone in data[host][ins]) {
+                    if (data[host][ins][onlyone].name == instance){
+                        var ins = data[host][ins][onlyone];
+                        append_info_item("state",ins.state);
+                        append_info_item("last_update_time",ins.last_update_time);
+                        //append_info_item("healthy",ins.healthy);
+                        var moniting_state = ins.moniting_state;
+                        var notification_state = ins.notification_state;
+                        if(moniting_state != null){
+                            for(var state in moniting_state) {
+                                if(state != "uuid") {
+                                    var ip_state = moniting_state[state];
+                                    for(item in ip_state) {
+                                        if(item == "arp") {
+                                            append_state_item(state, "ARP", ip_state[item])
+                                        }
+                                        if(item == "ping") {
+                                            append_state_item(state, "PING", ip_state[item])
+                                        }
+                                        if(item == "tcp") {
+                                            for(port in ip_state[item]){
+                                                append_state_item(state, "TCP: " + port, ip_state[item][port]);
+                                            }
+                                        }
+                                        if(item == "udp") {
+                                            for(port in ip_state[item]){
+                                                append_state_item(state, "UDP: " + port, ip_state[item][port]);
+                                            }
+                                        }
+                                    }
+                                } 
+                            }
+                        }
+                        else {
+                            append_state_item();
+                        }
+                        
+                        if(notification_state != null) {
+                            //alert(JSON.stringify(notification_state))
+                            var bandwidth_usage = notification_state.bandwidth_usage;
+                            var cpu_usage = notification_state.cpu_usage;
+                            var cpu_usage_real = notification_state.cpu_usage_real;
+                            //alert(bandwidth_usage);
+                            //alert(cpu_usage);
+                            append_state_noti_item("cpu_usage", cpu_usage, cpu_usage_real);
+                            append_state_noti_item("bandwidth_usage", bandwidth_usage);
+                        }
+                        else{
+                            append_state_noti_item();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    function append_state_item(ip, item, state) {
+        if (state == undefined ) {
+            $("#instance_states_div").append(
+                "<i class='icon-warning-sign icon-black'></i> {% trans 'No Network state for this instance.' %}<br />"
+            );
+            return;
+        }
+        if (state == 1) {
+            var image = "<i class='icon-ok icon-black'></i>";
+        }
+        else {
+            var image = "<i class='icon-remove icon-black'></i>";
+        }
+        $("#instance_states_div").append(
+            "<i class='icon-asterisk icon-black'></i> " + ip + "&nbsp;&nbsp;&nbsp;" + item + " " + image + "<br />"
+        );
+    }
+    
+    function append_info_item(item, state) {
+        if(item == "state") {
+            $("#instance_info_div").append(
+                "<i class='icon-eye-open icon-black'></i> Status: " + state + "<br />"
+            );
+        }
+        if(item == "last_update_time"){
+            $("#instance_info_div").append(
+                "<i class='icon-time icon-black'></i> Last update time : " + state + "<br />"
+            );
+        }
+    }
+    
+    function append_state_noti_item(item, state, cpu_usage_real) {
+        if (item == undefined ) {
+            $("#instance_states_div").append(
+                "<i class='icon-warning-sign icon-black'></i> {% trans 'No System state for this instance.' %}<br />" 
+            );
+            return;
+        }
+        
+        if (state == 0) {
+            var image = "<i class='icon-ok icon-black'></i>";
+        }
+        else {
+            var image = "<i class='icon-remove icon-black'></i>";
+        }
+        
+        if(item == "cpu_usage"){
+            $("#instance_states_div").append(
+                "<i class='icon-asterisk icon-black'></i> CPU Usage: " + cpu_usage_real + image + "<br />"
+            );
+        }
+        if(item == "bandwidth_usage"){
+            $("#instance_states_div").append(
+                "<i class='icon-asterisk icon-black'></i> Bandwidth Usage: " + image + "<br />"
+            );
+        }
+    }
+});
+</script>
+{% endblock %}
+{% block content %}
+    <br />
+    <div class="instance_detail_table">
+        <table>
+            <tr>
+                <td>{% trans 'Physical Host' %}</td>
+                <td>{% trans 'Instances' %}</td>
+                <td>{% trans 'Moniting State' %}</td>
+                <td>{% trans 'Instance Info' %}</td>
+            </tr>
+            <tr>
+                <td id="hosts_list_td">
+                    <select multiple="multiple" id="hosts_list_select" size="25" name="hosts_list_select"></select>
+                </td>
+                <td id="instances_list_td">
+                    <select multiple="multiple" id="instances_list_select" size="25" name="instances_list_select"></select>
+                </td>
+                <td id="instance_states_td">
+                    <div id="instance_states_div"></div>
+                </td>
+                <td id="instance_info_td">
+                    <div id="instance_info_div"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}

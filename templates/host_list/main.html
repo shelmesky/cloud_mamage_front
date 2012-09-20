@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load show_healthy %}
+{% block content %}
+    <h4>Host list: {{ host_list|length }} Records</h4>
+    <table class="table  table-bordered table-condensed" id="instance_table">
+    <thead>
+        <tr>
+            <th>{% trans 'Host' %}</th>
+            <th>{% trans 'Address' %}</th>
+            <th>{% trans 'Status' %}</th>
+            <th>{% trans 'Status Duration' %}</th>
+            <th>{% trans 'Output' %}</th>
+            <th>{% trans 'Healthy' %}</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in host_list %}
+            {% if item.current_state == 1 %}
+                <tr style="background-color: rgb(255, 187, 187);">
+            {% else %}
+                <tr>
+            {% endif %}
+                    {% if item.current_state == 0 %}
+                        <td style="background-color: rgb(51,255,0);">
+                            <a href="{% url service_list %}?host={{ item.display_name }}">{{ item.display_name }}</a>
+                            <a href="{% url perfdata item.display_name 'all' %}"><i class="icon-star icon-black"></i></a>
+                        </td>
+                        <td style="background-color: rgb(51,255,0);">{{ item.address }}</td>
+                        <td style="background-color: rgb(51,255,0);">UP</td>
+                    {% elif item.current_state == 1 %}
+                        <td style="background-color: #F83838;">
+                            <a href="{% url service_list %}?host={{ item.display_name }}">{{ item.display_name }}</a>
+                            <a href="{% url perfdata item.display_name 'all' %}"><i class="icon-star icon-black"></i></a>
+                        </td>
+                        <td style="background-color: #F83838;">{{ item.address }}</td>
+                        <td style="background-color: #F83838;">DOWN</td>
+                    {% endif %}
+                    
+                    <td>{{ item.state_duration }}</td>
+                    <td>{{ item.output }}</td>
+                    <td>{% render_hosts_healthy_percent item.host_object_id services_list %}</td>
+                </tr>
+        {% endfor %}
+    </tbody>
+{% endblock %}
+

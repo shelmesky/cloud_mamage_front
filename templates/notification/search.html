@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+    <script type="text/javascript">
+        $(function() {
+            $("#starttime_datepicker").datetimepicker({
+                dateFormat:"yy-mm-dd",
+                showButtonPanel: true,
+                changeMonth: true,
+                changeYear: true,
+                });
+            $("#endtime_datepicker").datetimepicker({
+                dateFormat:"yy-mm-dd",
+                showButtonPanel: true,
+                changeMonth: true,
+                changeYear: true,
+                hour:23,
+                minute:59
+                });
+        });
+    </script>
+{% endblock %} 
+
+
+{% block content %}
+<h4>{% trans 'Advanced Search' %}</h4>
+<div class="well">
+    <form method="get" action="{% url advanced_search_result %}">
+        <input type="hidden" name="form_search" value="1">
+        <p>{% trans 'Search by hostname、service description、plugin output:' %}</p>
+        <p></p><input class="input-xlarge" name="keyword"></p>
+        
+        <p>{% trans 'Created Time: (e.g. 2012-05-06 10:05)' %}</p>
+        <p>From: <input class="input-medium" id="starttime_datepicker" name="starttime">
+        To: <input class="input-medium" id="endtime_datepicker" name="endtime"></p>
+        
+        <p>{% trans 'Notifications Level:' %}</p>
+        <p>
+        <span class="label label-important">Critical</span><input type="checkbox" name="critical" checked="ture">&nbsp;&nbsp;
+        <span class="label label-warning">Warning</span><input type="checkbox" name="warning" checked="ture">&nbsp;&nbsp;
+        <span class="label label-inverse">Unknow</span><input type="checkbox" name="unknown" checked="ture">&nbsp;&nbsp;
+        </p>
+        <br />
+        <p><button type="submit" class="btn btn-primary">{% trans 'Submit' %}</button></p>
+    </form>
+</div>
+{% endblock %}
+

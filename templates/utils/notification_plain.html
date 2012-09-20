@@ -1,0 +1,2 @@
+Nagios notifications: {% if state == '1' %} CRITICAL!!! {% elif state == '2' %} WARNING! {% else %} UNKNOWN! {% endif %}
+{{ datetime }} {{ hostname }} {{ service_description }} {{ output }}

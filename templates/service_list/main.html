@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load show_service_chart %}
+{% block content %}
+
+{% if host_not_exist %}
+
+<div class="well">
+    Sorry, but can not found data for this host!
+</div>
+
+{% endif %}
+    
+{% if service_list %}
+    <h4>Service list: {{ service_list|length }} Records</h4>
+    <table class="table  table-bordered table-condensed" id="instance_table">
+    <thead>
+        <tr>
+            <th>Host</th>
+            <th>Service</th>
+            <th>State</th>
+            <th>State Duration</th>
+            <th>Output</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in service_list %}
+            {% if item.current_state == 2 %}
+                <tr style="background-color: rgb(255, 187, 187);">
+            {% elif item.current_state == 1 %}
+                <tr style="background-color: rgb(254, 255, 193);">
+            {% elif item.current_state == 0 %}
+                <tr>
+            {% endif %}
+                    <td>{{ item.hostname }}</td>
+                    <td>
+                        {{ item.display_name }}
+                        {% show_service_chart item.hostname item.display_name %}
+                    </td>
+                
+                    {% if item.current_state == 0 %}
+                        <td style="background-color: rgb(51,255,0);">UP</td>
+                    {% elif item.current_state == 1 %}
+                        <td style="background-color: rgb(255, 255, 0);">WARNING</td>
+                    {% elif item.current_state == 2 %}
+                        <td style="background-color: #F83838;">CRITICAL</td>
+                    {% endif %}
+            
+                    <td>{{ item.state_duration }}</td>
+                    <td>{{ item.output }}</td>
+                </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+{% endif %}
+{% endblock %}
+

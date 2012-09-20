@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if finish_update %}
+    <div class="well">
+        Successfully update instances moniting setting.
+    </div>
+{% endif %}
+
+{% if instance_info %}
+    <h4>{% trans 'Network Moniting Setting' %}</h4><br />
+    <div class="well">
+        {% trans 'Instance Name: ' %}{{ instance_info.name }}<br />
+        {% trans 'IP Addresses: ' %}
+        {% for ip in instance_info.ip_address %}
+            {{ ip }}
+        {% endfor %}
+        <br />
+        {% trans 'Host: ' %}{{ instance_info.physical_host }}<br />
+        {% trans 'Status: ' %}{{ instance_info.state }}
+        <br /><br />
+        {% trans 'Note: If you terminate this instance, the policy of this instance will be delete also!!!' %}
+    </div>
+    <div id="instance_moniting_form" class="well">
+        <form action="" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="instance_name" value="{{ instance_info.name }}">
+            <input type="hidden" name="instance_ip" value="{{ instance_info.ip_address }}">
+            {% trans 'ARP:' %}&nbsp;
+            <input type="checkbox" name="arp" {% if instance_config.moniting_state.arp %}checked="true"{% endif %}>&nbsp;{% trans "Checked means will send ARP Request to instance and hope get response." %}<br />
+            
+            {% trans 'PING:' %}&nbsp;
+            <input type="checkbox" name="ping" {% if instance_config.moniting_state.ping %}checked="true"{% endif %}>&nbsp;{% trans "Checked means will ping instance's ip address." %}<br /><br />
+            
+            {% trans 'TCP Port:' %}&nbsp;
+            <input type="text" name="tcp" class="x-input-large" {% if instance_config.moniting_state.tcp %}value="{{ instance_config.moniting_state.tcp }}"{% endif%}>
+                &nbsp;{% trans "Port list for check using TCP (Comma Separated Values)." %}<br />
+            
+            {% trans 'UDP Port:' %}&nbsp;
+            <input type="text" name="udp" class="x-input-large" {% if instance_config.moniting_state.udp %}value="{{ instance_config.moniting_state.udp }}"{% endif%}>&nbsp;{% trans "Port list for check using UDP (Comma Separated Values)." %}<br />
+            <button type="submit" class="btn btn-primary">{% trans 'Submit' %}</button>
+        </form>
+    </div>
+{% endif %}
+{% endblock %}

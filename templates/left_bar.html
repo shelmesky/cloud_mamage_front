@@ -1,0 +1,102 @@
+{% load require_permission %}
+ <div class="navbar navbar-fixed-top">
+   <div class="navbar-inner">
+     <div class="container">
+       <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+       </a>
+       <a class="brand" href="#" style="color: white;">Cloud Manage</a>
+       <div class="nav-collapse">
+         <ul class="nav opencloud-menu" id="open_cloud_menu">
+             <li id="home"><a href="{% url home %}">Home</a></li>
+             <li id="host_list"><a href="{% url host_list %}">Host</a></li>
+             <li id="service_list"><a href="{% url service_list %}">Service</a></li>
+            {% checkpermission 'Operator' %}
+                 <li id="instances_list"><a href="{% url instances-list %}">Instances</a></li>
+             {% endcheckpermission %}
+             
+             <!--
+             {% checkpermission 'Operator' %}
+                 <li id="instances-detail"><a href="{% url instances-detail %}">Instances</a></li>
+             {% endcheckpermission %}
+             -->
+             
+             {% checkpermission 'Admin' %}
+                 <li id="notification_list"><a href="{% url notifications %}">Notification</a></li>
+             {% endcheckpermission %}
+             
+             {% checkpermission 'Operator' %}
+                 <li id="owner_jobs_list"><a href="{% url owner_job %}">Job</a></li>
+             {% endcheckpermission %}
+             
+             {% checkpermission 'Admin' %}
+                 <li id="dispatched_jobs_list"><a href="{% url dispatched_job %}">Dispatched Job</a></li>
+             {% endcheckpermission %}
+             
+             <li id="system_settings"><a href="{% url system_settings %}">Setting</a></li>
+         </ul>
+         <ul class="nav pull-right">
+             <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    {% trans 'Logged as ' %} {{ request.session.username }}
+                    <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="{% url logout %}">Logout</a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="{% url userprofile %}">Profile</a>
+                    </li>
+                </ul>
+             </li>
+         </ul>
+       </div><!--/.nav-collapse -->
+     </div>
+   </div>
+ </div>
+ <script>
+     $(function(){
+         var url = window.location.href;
+         
+        if (url.indexOf('{% url home %}') != -1) {
+             $('#home').addClass('active');
+         }
+         if (url.indexOf('{% url host_list %}') != -1) {
+             $('#host_list').addClass('active');
+         }
+        else if (url.indexOf('perfdata') != -1) {
+            $('#host_list').addClass('active');
+         }
+         else if (url.indexOf('{% url service_list %}') != -1) {
+             $('#service_list').addClass('active');
+         }
+        else if (url.indexOf('{% url instances-list %}') != -1) {
+             $('#instances_list').addClass('active');
+         }
+         else if (url.indexOf('instances/setting') != -1) {
+            $('#instances_list').addClass('active');
+         }
+         
+        
+        //else if (url.indexOf('{% url instances-detail %}') != -1) {
+        //   $('#instances-detail').addClass('active');
+        //}
+         
+         else if (url.indexOf('{% url notifications %}') != -1) {
+             $('#notification_list').addClass('active');
+         }
+         else if (url.indexOf('{% url owner_job %}') != -1) {
+             $('#owner_jobs_list').addClass('active');
+         }
+         else if (url.indexOf('{% url dispatched_job %}') != -1) {
+             $('#dispatched_jobs_list').addClass('active');
+         }
+         else if (url.indexOf('{% url system_settings %}') != -1) {
+             $('#system_settings').addClass('active');
+         }
+     });
+ </script>

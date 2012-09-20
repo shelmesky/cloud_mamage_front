@@ -1,0 +1,20 @@
+<div class="well logo-opencloud">
+    <div class="pull-right">
+        <div class="btn-group">
+            <a class="btn btn-info" href=""><i class="icon-user icon-white"></i> {{ request.session.username }}</a> 
+            <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="{% url logout %}" title="SignOut">
+                        <i class="icon-off"></i> {% trans 'SignOut' %}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <a href="nova-overview" style='width:135px;height:45px;position:absolute;top:10px;left:20px;'>&nbsp;</a>
+    {% if local_server_ip %}
+        <span style="color:#222;font-size:80%;position:absolute;top:45px;left:72px;">Server IP: {{ local_server_ip }}</span>
+    {% endif %}
+    <div class="clearfix"></div>
+</div>

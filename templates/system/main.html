@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block extra_head %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var data = {{ host_service_list_json|safe }};
+            var host_list = Array();
+            for(var k in data) {
+                for (var j in data[k]){
+                    host_list.push(j);
+                }
+            }
+            $("#host_list_include").attr({'data-source':JSON.stringify(host_list)});
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    
+    {% if updated %}
+        <div class="well">
+            {% trans 'Rule has been successfuly updated!' %}
+        </div>
+    {% endif %}
+    
+    
+    {% if host_service_list %}
+        <div class="well">
+            <form method="POST" action="/system_update/">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <td><p>{% trans 'Host List:' %}</p></td>
+                        <td><p>{% trans 'State:' %}</p></td>
+                        <td><p>{% trans 'User:' %}</p></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select multiple="multiple" id="multiple_host" size="7" name="host_list">
+                            {% for k,v in host_service_list %}
+                                <option>{{ k }}</option>
+                            {% endfor %}
+                            </select>    
+                        </td>
+                        <td>
+                            <select multiple="multiple" id="multiple_service" size="7" name="state">
+                                <option value="1">{% trans 'Warning' %}</option>
+                                <option value="2">{% trans 'Critical' %}</option>
+                                <option value="3">{% trans 'Unknow' %}</option>
+                            </select>                   
+                        </td>
+                        <td>
+                            <select multiple="multiple" size="7" name="user_list">
+                                {% for user in users %}
+                                    <option>{{ user }}</option>
+                                {% endfor %}
+                            </selec>
+                        </td>
+                    </tr>
+                </table>
+                {% trans 'OR Hostname Include:' %} <input type="text" class="input-xlarge" style="width: 508px; height: 28px;" data-provide="typeahead" name="host_list_include" id="host_list_include">
+                <br />
+                {% trans 'Plugin Output Include:' %} <input type="text" class="input-xlarge" style="width: 510px; height: 28px;" name="output">
+                <br />
+                <button type="submit" class="btn btn-primary">{% trans 'Submit' %}</button>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if original_ruler %}
+        <h4>{% trans 'Ruler List:' %}</h3><br />
+        <table class="table table-striped table-bordered table-condensed" id="order_list_table">
+            <thead>
+                <tr>
+                    <th>{% trans 'ID' %}</th>
+                    <th>{% trans 'Created Time' %}</th>
+                    <th>{% trans 'Hostname' %}</th>
+                    <th>{% trans 'Hostname Include' %}</th>
+                    <th>{% trans 'State' %}</th>
+                    <th>{% trans 'Plugin Output Include' %}</th>
+                    <th>{% trans 'Send To User' %}</th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% for i in original_ruler %}
+                <tr>
+                    <td>{{ i.id }}</td>
+                    <td>{{ i.created_time }}</td>
+                    <td>
+                        {% for host in i.host_name %}
+                            {{ host }}
+                        {% endfor %}
+                    </td>
+                    <td>{{ i.host_name_include }}</td>
+                    <td>
+                        {% for state in i.state %}
+                            {% if state == '3' %}
+                                {% trans 'UNKNOW' %}
+                            {% elif state == '2' %}
+                                {% trans 'CRITICAL' %}
+                            {% elif state == '1' %}
+                                {% trans 'WARNNING' %}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ i.output }}</td>
+                    <td>
+                        {% for user in i.user_name %}
+                            {{ user }}
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% load paginator_bar %}
+        {% render_paginator_bar paged_ruler %}
+    {% endif %}
+{% endblock %}
+

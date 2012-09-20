@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block extra_head %}
+{% endblock %}
+
+{% block content %}
+
+<h4>Cloud Manager</h4><br />
+<div id="hosts_problems" class="well">
+    <h4>{% trans 'Hosts: ' %}</h4><br />
+    <a href="{% url host_list %}?host_type=unhandled">{% trans 'Unhandled Problems: ' %}{{ problem_hosts }}</a>
+</div>
+
+<div id="services_problems" class="well">
+    <h4>{% trans 'Services: ' %}</h4><br />
+    <a href="{% url service_list %}?service_type=unhandled">{% trans 'Unhandled Problems: ' %}{{ problem_services }}</a>
+</div>
+
+<div id="notification_problems" class="well">
+    <h4>{% trans 'Notifications: ' %}</h4><br />
+    <a href="{% url notifications %}">{% trans 'Unhandled Notifications: ' %} {{ unhandled_notifications }}<br /></a>
+    <a href="{% url owner_job %}">{% trans 'Unhandled Jobs: ' %} {{ unhandled_jobs }}</a>
+</div>
+
+{% endblock %}
+

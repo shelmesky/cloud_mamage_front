@@ -1,0 +1,35 @@
+<div class="pagination pull-right">
+    <ul>
+        {% if paginator.has_previous %}
+            {% if keyword or start_time or end_time or critical or warning or unknown %}
+                <li><a title="{% trans 'Previous Page' %}" href="?page={{ paginator.previous_page_number }}&keyword={{ keyword }}&starttime={{ starttime }}&endtime={{ endtime }}&critical={{ critical }}&warning={{ warning }}&unknown={{ unknown }}" >&laquo;</a></li>
+            {% else %}
+                <li><a title="{% trans 'Previous Page' %}" href="?page={{ paginator.previous_page_number }}">&raquo;</a></li>
+            {% endif %}
+        {% else %}
+            <li class="disabled"><a title="{% trans 'This is the first page.' %}" href="javascript:;">&laquo;</a></li>
+        {% endif %}
+
+        {% for pb in page_bars %}
+            {% if pb == paginator.number %}
+                <li class="active"><a href="javascript:;">{{ paginator.number }}</a></li>
+            {% else %}
+                {% if keyword or start_time or end_time or critical or warning or unknown %}
+                    <li><a href="?page={{ pb }}&keyword={{ keyword }}&starttime={{ starttime }}&endtime={{ endtime }}&critical={{ critical }}&warning={{ warning }}&unknown={{ unknown }}">{{ pb }}</a></li>
+                {% else %}
+                    <li><a href="?page={{ pb }}">{{ pb }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if paginator.has_next %}
+            {% if keyword or start_time or end_time or critical or warning or unknown %}
+                <li><a title="{% trans 'Next Page' %}" href="?page={{ paginator.next_page_number }}&keyword={{ keyword }}&starttime={{ starttime }}&endtime={{ endtime }}&critical={{ critical }}&warning={{ warning }}&unknown={{ unknown }}">&raquo;</a></li>
+            {% else %}
+                <li><a title="{% trans 'Next Page' %}" href="?page={{ paginator.next_page_number }}">&raquo;</a></li>
+            {% endif %}
+        {% else %}
+            <li class="disabled"><a title="{% trans 'This is the last page.' %}" href="javascript:;">&raquo;</a></li>
+        {% endif %}
+    </ul>
+</div>
